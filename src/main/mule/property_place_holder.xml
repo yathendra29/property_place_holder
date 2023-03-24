@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ef3e61a2-7845-4468-99fb-d4a67fe810f6" >
+		<http:listener-connection host="${http.listner.host}" port="${http.listner.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="d46d42e2-58ca-488b-b18e-9126a47167ca" file="${env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="b80c6958-f51a-47a9-bc2a-34f8c861acff" name="env" value="dev" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="b89a7365-c848-486d-8cca-301723191c6f" >
+		<http:request-connection host="${http.request.host}" port="${http.request.port}" />
+	</http:request-config>
+	<flow name="property_place_holderFlow" doc:id="32e846a2-dc4f-4308-bc90-20ac76181262" >
+		<http:listener doc:name="Listener" doc:id="9b2a4b02-c189-4f87-b165-d397d9513a08" config-ref="HTTP_Listener_config" path="${http.listner.path}"/>
+		<ee:transform doc:name="input_Payload" doc:id="7e0247c6-76df-4706-b0a8-bc2c5e9a03ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Hello World, we are learning property place holder"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="payload" doc:id="34456bac-fda8-423e-83a5-4693ab41a21e" message="#[payload]"/>
+		<logger level="INFO" doc:name="p('')" doc:id="936d6672-9329-472d-8ac0-842454c95300" message="#[p('parent.child')]"/>
+		<logger level="INFO" doc:name="$" doc:id="153615c8-4756-4166-9ce6-823aa42947a0" message="${parent.child}"/>
+		<http:request method="POST" doc:name="Request" doc:id="af75cb4f-4d1f-469c-b8a2-691bb39ab752" config-ref="HTTP_Request_configuration" path="${http.request.path}"/>
+	</flow>
+	<flow name="property_place_holderFlow1" doc:id="e786ade0-a3e7-4952-ba64-5ee773cc0ff1" >
+		<http:listener doc:name="Listener" doc:id="253c169b-f168-4419-83c0-145aa28f218d" config-ref="HTTP_Listener_config" path="${http.request.path}"/>
+		<logger level="INFO" doc:name="payload" doc:id="89e7d2d0-6486-46ab-bdc2-92a884eebcf0" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="699ba726-77bb-4638-9f96-d64163db7bfc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"requestedPath":p('http.request.path'),
+	"requestedPort":p('http.request.port')
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="71932544-2591-4b6b-8f19-398a1ba9b635" message="#[payload]"/>
+	</flow>
+
+	</mule>

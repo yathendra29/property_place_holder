@@ -1,0 +1,12 @@
+http:
+  listner:
+    host : "localhost"
+    port : "8081"
+    path : "/pph"
+  request:
+    host : "localhost"
+    port : "8081"
+    path : "/newpath_UAT"
+
+parent:
+  child : "Hello_world_UAT"
